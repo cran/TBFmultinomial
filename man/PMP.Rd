@@ -5,8 +5,8 @@
 \title{Posterior model probability}
 \usage{
 PMP(fullModel = NULL, candidateModels = NULL, data = NULL,
-  discreteSurv = TRUE, method = "LEB", prior = "flat", package = "nnet",
-  maxit = 150, numberCores = 1)
+  discreteSurv = TRUE, modelPrior = NULL, method = "LEB",
+  prior = "flat", package = "nnet", maxit = 150, numberCores = 1)
 }
 \arguments{
 \item{fullModel}{formula of the model including all potential variables}
@@ -20,6 +20,9 @@ computed}
 \item{discreteSurv}{Boolean variable telling us whether a 'simple'
 multinomial regression is looked for or if the goal is a discrete
 survival-time model for multiple modes of failure is needed.}
+
+\item{modelPrior}{optionaly the model priors can be computed before if
+candidateModels is different from NULL.}
 
 \item{method}{tells us which method for the definition of g should be
 used. Possibilities are: \code{LEB}, \code{GEB}, \code{g=n}, \code{hyperG},

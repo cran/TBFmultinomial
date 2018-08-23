@@ -4,7 +4,7 @@
 \alias{CSVS}
 \title{Cause-specific variable selection (CSVS)}
 \usage{
-CSVS(g, model, discreteSurv = TRUE, package = "nnet")
+CSVS(g, model, discreteSurv = TRUE, nbIntercepts = NULL, package = "nnet")
 }
 \arguments{
 \item{g}{the estimated g, must be fixed to one value}
@@ -14,6 +14,8 @@ CSVS(g, model, discreteSurv = TRUE, package = "nnet")
 \item{discreteSurv}{Boolean variable telling us whether a 'simple'
 multinomial regression is looked for or if the goal is a discrete
 survival-time model for multiple modes of failure is needed.}
+
+\item{nbIntercepts}{how many cause-specific intercepts are there? they}
 
 \item{package}{Which package has been used to fit the model, \code{nnet}
 or \code{VGAM}?}

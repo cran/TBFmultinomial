@@ -1,5 +1,5 @@
 TBF_ingredients <-
-function(fullModel, data, discreteSurv = FALSE, numberCores = 1,
+function(fullModel = NULL, data, discreteSurv = FALSE, numberCores = 1,
          candidateModels = NULL, package = 'nnet', maxit = 150){
   #' Ingredients to calculate the TBF
   #'

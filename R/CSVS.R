@@ -10,7 +10,8 @@ logBF <- function(g, t){
   return(term1+term2)
 }
 
-CSVS <- function(g, model, discreteSurv = TRUE, package = 'nnet'){
+CSVS <- function(g, model, discreteSurv = TRUE,
+                 nbIntercepts = NULL, package = 'nnet'){
   #' Cause-specific variable selection (CSVS)
   #'
   #'
@@ -24,6 +25,7 @@ CSVS <- function(g, model, discreteSurv = TRUE, package = 'nnet'){
   #' survival-time model for multiple modes of failure is needed.
   #' @param package Which package has been used to fit the model, \code{nnet}
   #' or \code{VGAM}?
+  #' @param  nbIntercepts how many cause-specific intercepts are there? they
   #' @import nnet VGAM
   #' @importFrom utils getFromNamespace
   #' @examples
@@ -47,15 +49,15 @@ CSVS <- function(g, model, discreteSurv = TRUE, package = 'nnet'){
   #' @author Rachel Heyard
 
   sum <- summary(model)
-  nbIntercepts <-
-    ifelse((discreteSurv & package == 'VGAM'),
-           length(sum@extra$colnames.y)*length(sum@assign[[2]]),
-           ifelse((!discreteSurv & package == 'VGAM'),
-                  length(sum@extra$colnames.y)-1,
-                  ifelse(discreteSurv & package == 'nnet',
-                         (as.numeric(str_split(attr(sum$terms, 'dataClasses')[2],
-                                               pattern = '\\.')[[1]][2]) + 1),
-                         1)))
+  if (is.null(nbIntercepts)) {nbIntercepts <-
+      ifelse((discreteSurv & package == 'VGAM'),
+             length(sum@extra$colnames.y)*length(sum@assign[[2]]),
+             ifelse((!discreteSurv & package == 'VGAM'),
+                    length(sum@extra$colnames.y)-1,
+                    ifelse(discreteSurv & package == 'nnet',
+                           (as.numeric(str_split(attr(sum$terms, 'dataClasses')[2],
+                                                 pattern = '\\.')[[1]][2]) + 1),
+                           1)))}
   all_coefs <- if (package == 'VGAM') sum@coef3[ , 1] else sum$coefficients
 
   intercepts <- if (package == 'VGAM') all_coefs[1:nbIntercepts] else
@@ -152,10 +154,14 @@ CSVS <- function(g, model, discreteSurv = TRUE, package = 'nnet'){
   sigma_corr <- sigma_betaNot0 - sigma_beta0_betaNot0 %*%
     solve(sigma_beta0) %*% sigma_betaNot0_beta0
   sigma_correct <- rbind(cbind(sigma_corr,
-                               matrix(0, ncol= ncol(sigma_beta0),
+                               matrix(0, ncol= ifelse(is.null(ncol(sigma_beta0)),
+                                                      1, ncol(sigma_beta0)),
                                       nrow = nrow(sigma_corr))),
-                         matrix(0, ncol = ncol(sigma_beta0) + ncol(sigma_corr),
-                                nrow = nrow(sigma_beta0)))
+                         matrix(0, ncol = ifelse(is.null(ncol(sigma_beta0)),
+                                                 1, ncol(sigma_beta0)) +
+                                  ncol(sigma_corr),
+                                nrow = ifelse(is.null(ncol(sigma_beta0)),
+                                              1, ncol(sigma_beta0))))
   new_coefs <- c(alpha_betas_not0_corrected, betas_0)
   if (package == 'nnet'){
     interceptNames <-

@@ -4,8 +4,9 @@
 \alias{TBF_ingredients}
 \title{Ingredients to calculate the TBF}
 \usage{
-TBF_ingredients(fullModel, data, discreteSurv = FALSE, numberCores = 1,
-  candidateModels = NULL, package = "nnet", maxit = 150)
+TBF_ingredients(fullModel = NULL, data, discreteSurv = FALSE,
+  numberCores = 1, candidateModels = NULL, package = "nnet",
+  maxit = 150)
 }
 \arguments{
 \item{fullModel}{formula of the model including all potential variables}

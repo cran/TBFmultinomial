@@ -1,6 +1,6 @@
 PMP <-
 function(fullModel= NULL, candidateModels = NULL, data = NULL,
-         discreteSurv = TRUE, method = 'LEB', prior = 'flat',
+         discreteSurv = TRUE, modelPrior = NULL, method = 'LEB', prior = 'flat',
          package = 'nnet', maxit = 150, numberCores = 1) {
   #' Posterior model probability
   #'
@@ -14,6 +14,8 @@ function(fullModel= NULL, candidateModels = NULL, data = NULL,
   #' @param discreteSurv Boolean variable telling us whether a 'simple'
   #' multinomial regression is looked for or if the goal is a discrete
   #' survival-time model for multiple modes of failure is needed.
+  #' @param modelPrior optionaly the model priors can be computed before if
+  #' candidateModels is different from NULL.
   #' @param method tells us which method for the definition of g should be
   #' used. Possibilities are: \code{LEB}, \code{GEB}, \code{g=n}, \code{hyperG},
   #' \code{ZS}, \code{ZSadapted} and \code{hyperGN}
@@ -26,6 +28,7 @@ function(fullModel= NULL, candidateModels = NULL, data = NULL,
   #' @param maxit Only needs to be specified with package \code{nnet}: maximal
   #' number of iterations
   #' @return an object of class \code{TBF.ingredients}
+  #' @importFrom stats as.formula
   #' @export
   #' @examples
   #' # extract the data:
@@ -53,9 +56,12 @@ function(fullModel= NULL, candidateModels = NULL, data = NULL,
       } else stop('Either define fullModel OR candidatModels')
     }
   }
-
-  mod.prior <- model_priors(fullModel = fullModel, discreteSurv = discreteSurv,
-                            modelPrior = prior)
+  if (is.null(modelPrior)){
+    fM <- tail(candidateModels, 1)
+    modelPrior <- model_priors(fullModel = as.formula(fM),
+                               discreteSurv = discreteSurv,
+                               modelPrior = prior)
+  }
   if (method %in% c('LEB', 'hyperG', 'GEB', 'ZSadapted', 'g=n', 'hyperGN',
                     'ZS')){
     ingredients.for.TBF <- TBF_ingredients(fullModel = fullModel, data= data,
@@ -68,7 +74,7 @@ function(fullModel= NULL, candidateModels = NULL, data = NULL,
                        discreteSurv = discreteSurv)
     TBF <- tbf_results$TBF
     g <- tbf_results$G
-    post.mod.prob <- (TBF * mod.prior) / sum(TBF * mod.prior)
+    post.mod.prob <- (TBF * modelPrior) / sum(TBF * modelPrior)
   }
   if (method %in% c('AIC', 'BIC')){
     AIC = (method == 'AIC')
@@ -76,10 +82,10 @@ function(fullModel= NULL, candidateModels = NULL, data = NULL,
                                                  data = data,
                                                  discreteSurv = discreteSurv,
                                                  AIC = AIC)
-    post.mod.prob <- (margLike * mod.prior) / sum(margLike * mod.prior)
+    post.mod.prob <- (margLike * modelPrior) / sum(margLike * modelPrior)
     g <- NULL
   }
-  res <- list(posterior = post.mod.prob, prior = mod.prior,
+  res <- list(posterior = post.mod.prob, prior = modelPrior,
               model = candidateModels, method = method,
               G = g)
   class(res) <- c('PMP', 'list')
