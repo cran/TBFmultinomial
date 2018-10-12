@@ -1,4 +1,4 @@
-33779f389c1cf9821f51140cf672d4c6 *DESCRIPTION
+9a8821852686ce2fd78ae376ba62d1e3 *DESCRIPTION
 f1159458a06f41a0289a8110ccf0b4d6 *NAMESPACE
 6c629ffac28ccd0d3b3ad0dfcc4c13c3 *R/AIC_BIC_based_marginalLikelihood.R
 f5b0f0f3e6422a1ea063567fd9d9ffda *R/CSVS.R
@@ -11,7 +11,7 @@ d79912f14aff29f7faaa1086535ad886 *R/M.R
 47cbbf4893984f7edf09b72c2436e984 *R/TBF.R
 ac73932d8e469b834a05023e083a2acd *R/TBF_ingredients.R
 d278e9fc1b5c34519563daf5afa3d23e *R/TBFmultinomial-package.R
-b610d571ff9774b672c4522e0b0259e8 *R/VAP_data.R
+15605b2f42e928075f2b460b293e21b7 *R/VAP_data.R
 b7ce427fd970fc2fdaece384db52464c *R/all_formulas.R
 32b30f08bcbccdca5208c0807721d061 *R/model_priors.R
 1fa6c8a35f833614b2c0848a80b46625 *R/nullModel_formula.R
@@ -19,9 +19,9 @@ b7ce427fd970fc2fdaece384db52464c *R/all_formulas.R
 adfe7141b047c76b4db48c1e722cd183 *R/sample_multinomial.R
 d3bbc6fc11f187b8f62deb25078b8dd8 *build/vignette.rds
 2446d1ee977999507cb1deb3ab8d3629 *data/VAP_data.rda
-5749ed049fce0c86a35416914c1a6e5d *inst/doc/TBFmultinomial.R
-aefcab42c866b9b569b46b54c53ba1a0 *inst/doc/TBFmultinomial.Rnw
-b24a3010ba5d24a15efe1a4f550162f7 *inst/doc/TBFmultinomial.pdf
+fb3c942c19909f8aec03f44883d4e3e8 *inst/doc/TBFmultinomial.R
+d0234452c68b943b36d43196f17c25b1 *inst/doc/TBFmultinomial.Rnw
+f960592942c7cc76b9c4e09c04830481 *inst/doc/TBFmultinomial.pdf
 1d0ebde43bd9b156a7bf55d266b048a9 *man/AIC_BIC_based_marginalLikelihood.Rd
 5bec2dea7dfd585f3f364d487688ac1a *man/CSVS.Rd
 0f3a5f1161b5a0351c311ef4b3d80510 *man/PIPs_by_landmarking.Rd
@@ -37,5 +37,5 @@ a14e04528579275d64d76206688d1639 *man/as.data.frame.Rd
 5e000f725d709215ebcdfb6ee9d73934 *man/plot_CSVS.Rd
 5acae5e024082bc95f03ffd23c2db82a *man/postInclusionProb.Rd
 f1323b76418e6e711dfe7076c80a4d52 *man/sample_multinomial.Rd
-aefcab42c866b9b569b46b54c53ba1a0 *vignettes/TBFmultinomial.Rnw
-18b9c81333efa6bac4cdbe3bf5928480 *vignettes/vignette.bib
+d0234452c68b943b36d43196f17c25b1 *vignettes/TBFmultinomial.Rnw
+820f7c8632bfc81025d9598c25a72a8b *vignettes/vignette.bib

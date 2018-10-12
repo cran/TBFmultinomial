@@ -1,4 +1,4 @@
-\documentclass{article}
+\documentclass[12pt]{article}
 %\VignetteDepends{TBFmultinomial, splines}
 %\VignetteEngine{knitr::knitr}
 %\VignetteIndexEntry{TBFmultinomial}
@@ -7,16 +7,16 @@
 \newcommand{\tab}[1]{\textbf{#1}}
 
 \usepackage[a4paper, includefoot, includehead,
-            hmargin={1.5cm,1.5cm},
-            marginpar=5cm,
+            hmargin={3cm,3cm},
+            marginpar=8cm,
             textwidth=15cm,
-            textheight=25cm]{geometry}
+            textheight=23cm]{geometry}
 \usepackage{layouts}
 
-\newcommand\showpage{%
-\setlayoutscale{0.27}\setlabelfont{\tiny}%
-\printheadingsfalse\printparametersfalse
-\currentpage\pagedesign}
+% \newcommand\showpage{%
+% \setlayoutscale{0.27}\setlabelfont{\small}%
+% \printheadingsfalse\printparametersfalse
+% \currentpage\pagedesign}
 
 \usepackage[utf8]{inputenc}
 
@@ -43,10 +43,10 @@ library('knitr')
 @
 
 \section{Introduction}
-The package \texttt{glmBfp} does objective Bayesian variable selection using a methodology based on test-based Bayes factors (TBF) for generalised linear models \citep{HeldBoveGravestock2015} as well as for the Cox model \citep{HeldGravestockBove2016}. However, \texttt{glmBfp} cannot handle multinomial outcomes. Therefore, the package \texttt{TBFmultinomial} is an extension that allows mulitple outcomes as in the multinomial regression model. Most importantly the package has been developped for discrete time-to-event models with competing risks. The TBF methodology can easily be extended to these models, which are nothing else then multinomial regression models with a time-dependent intercept, see \cite{HeyardTimsitEssaiedHeld2017}.
+This vignette shall serve as an introduction to the \texttt{R}-package \texttt{TBFmultinomial}, written for the implementation of the methods presented in \cite{HeyardTimsitEssaiedHeld2017}. The package \texttt{glmBfp} does objective Bayesian variable selection using a methodology based on test-based Bayes factors (TBF) for generalised linear models \citep{HeldBoveGravestock2015} as well as for the Cox model \citep{HeldGravestockBove2016}. However, \texttt{glmBfp} cannot handle multinomial outcomes. Therefore, the package \texttt{TBFmultinomial} is an extension that allows for mulitple outcomes as in the multinomial regression model. Most importantly the package has been developped for discrete time-to-event models with competing risks. The TBF methodology can easily be extended to these models, which are simple multinomial regression models with a time-dependent intercept, see \cite{HeyardTimsitEssaiedHeld2017}.
 
 \section{Data example}
-Our data example will be similar to the one presented in \cite{HeyardTimsitEssaiedHeld2017}, but simplified. The goal of the analysis is to find a prediction model for the risk of acquiring a VAP. However if a patient is extubated or dies, a VAP cannot be diagnosed anymore. Extubation and death then compose the competing events/risks for VAP acquisition. The data is stored in the package as \texttt{VAP\_data}.
+Our data example will be similar to the one presented in \cite{HeyardTimsitEssaiedHeld2017}, but simplified. The goal of the analysis is to find a prediction model for the risk of acquiring a ventilator-associated pneumonia (VAP). However if a patient is extubated or dies, a VAP cannot be diagnosed anymore. Extubation and death then compose the competing events/risks for VAP acquisition. The data is stored in the package as \texttt{VAP\_data}.
 <<>>=
 library('TBFmultinomial')
 data("VAP_data")
@@ -55,48 +55,53 @@ head(VAP_data, 10)
 table(VAP_data$outcome)
 @
 
-Each row in the data set stands for one day of ventilation of a patient. We have \Sexpr{nrow(VAP_data)} ventilation days for \Sexpr{length(unique(VAP_data$ID))} distinct patients. We now want to find a prediction model for the variable \texttt{outcome} using the baseline variable \texttt{gender}, \texttt{type} (patient type, can be medical or surgical) and \texttt{SAPSadmission} (the simplified acute physiology score at admission) as well as the time-dependent variable \texttt{SOFA} (the daily sequential organ failure assessment score).
+Each row in the data set stands for one day of ventilation of a patient as it is needed for discrete survival models. If the data is in a short format, functions like \texttt{discSurv::dataLong()}. We have \Sexpr{nrow(VAP_data)} ventilation days for \Sexpr{length(unique(VAP_data$ID))} distinct patients. We now want to find a prediction model for the variable \texttt{outcome} by selecting among the baseline variable \texttt{gender}, \texttt{type} (patient type, can be medical or surgical) and \texttt{SAPSadmission} (the simplified acute physiology score at admission) as well as the time-dependent variable \texttt{SOFA} (the daily sequential organ failure assessment score).
 
 \section{Dynamic Bayesian variable selection}
 We will now proceed step by step to dynamic Bayesian variable selection in order to define a prediction model for the time to acquire a VAP taking into account its competing risks.
 
 \subsection{Posterior model probability}
-The first step will be to fit the candidate models and compute their posterior probabilities using the function \texttt{PMP()}. Our methodology is based on the $g$-prior so that we need to decide on the $g$ definition. We can either simply set $g$ equal to the sample size with \texttt{method=`g=n'}, or use an empirical Bayes (EB) approach like the local EB with \texttt{method=`LEB'} or the global EB with \texttt{method=`GEB'}. An other possibility is a fully Bayes approach with \texttt{method} $\in \lbrace$\texttt{`ZS', `ZSadapted', `hyperG', `hyperGN'}$\rbrace$. We refer to \cite{HeldBoveGravestock2015} for further detail on the $g$ definition.
+The first step will be to fit the candidate models and compute their posterior probabilities using the function \texttt{PMP()}. Our methodology is based on the $g$-prior so that we need to decide on a way to define $g$. We can either simply set $g$ equal to the sample size with \texttt{method=`g=n'}, or use an empirical Bayes (EB) approach like the local EB with \texttt{method=`LEB'} or the global EB with \texttt{method=`GEB'}. An other possibility is a fully Bayes approach with \texttt{method} $\in \lbrace$\texttt{`ZS', `ZSadapted', `hyperG', `hyperGN'}$\rbrace$. We refer to \cite{HeldBoveGravestock2015} for further detail on the definition of $g$.
 
-To use the \texttt{PMP()} function we first need to define the full model containing all the potential predictors with a time-dependent intercept defined as a natural spline with 4 degrees on the variable \texttt{day}:
+To use the \texttt{PMP()} function we first need to define the full model containing all the potential predictors with a time-dependent intercept. Here we define natural spline with 4 degrees on the variable \texttt{day} for the intercept:
 <<>>=
-full <- outcome ~ ns(day, df = 4) + gender + type + SAPSadmission + SOFA
+full <- outcome ~ ns(day, df = 4) +
+  gender + type + SAPSadmission + SOFA
+class(full)
 @
-The formula can be defined as a \texttt{formula-class} or as a character. Then we can apply the function on our data and use the default settings for the other parameters. By default a LEB approach is used for the estimation of $g$, a uniform (flat) prior is used on the candidate model space, the \texttt{nnet} package is used to fit the models with 150 iterations (max). We further need to tell the function that we are considering a discrete survival model by setting \texttt{discreteSurv} to \texttt{TRUE}.
+The formula can be defined as a \texttt{formula-class} or as a character. Then we can apply the function on our data and use the default settings for the other parameters. By default a LEB approach is used for the estimation of $g$, a uniform (flat) prior is used on the candidate model space, the \texttt{nnet} package is used to fit the models with 150 iterations (max). We further need to tell the function that we are considering a discrete survival model by setting \texttt{discreteSurv} to \texttt{TRUE}, so that the function knows that \texttt{ns(day, df = 4)} is interpreted as the intercept.
 <<>>=
-PMP_LEB_flat <- PMP(fullModel = full, data = VAP_data, discreteSurv = TRUE)
+PMP_LEB_flat <- PMP(fullModel = full, data = VAP_data,
+                    discreteSurv = TRUE)
 @
-Then, using the generic function \texttt{as.data.frame()}, we can nicely represent an object of class \texttt{PMP}; the models are ordered by their posterior probability. So the first element in the data frame is the model with the highest PMP: the maximum a posteriori (MAP) model is the one with only \texttt{SOFA} as predictor.
+Then, using the generic function \texttt{as.data.frame()}, we can nicely represent an object of class \texttt{PMP}; the models are ordered by their posterior probability. So the first element in the data frame is the model with the highest PMP: the maximum a posteriori (MAP) model is the candidate with only \texttt{SOFA} as predictor.
 <<>>=
 class(PMP_LEB_flat)
 as.data.frame(PMP_LEB_flat)
 @
-Instead of defining a full model as an input for the function, we can also fix the candidate models before and store them in a character vector with the first element being the reference model and the last the full model. Then we set the parameter \texttt{candidateModels} to this vector and leave \texttt{fullModel} undefined. In this way, we can fix some variables to be included by default.
+Instead of defining a full model as an input for the function, we can also fix the formulas of all the candidate models we want to consider before and store them in a character vector with the first element being the reference model and the last the most complex model. Then we set the parameter \texttt{candidateModels} to this vector and leave \texttt{fullModel} undefined. In this way, we can fix some variables to be included by default, or simply use and fit only a sample of all possible candidate models if the model space is big.
 
 \subsection{Posterior inclusion probability}
-Using the \texttt{PMP}-object we can also compute the posterior inclusion probabilities (PIPs) with the \texttt{postInclusionProb()} function.
+Using the \texttt{PMP}-object, the posterior inclusion probabilities (PIPs) can be computed with the \texttt{postInclusionProb()} function.
 <<>>=
 postInclusionProb(PMP_LEB_flat)
 @
-
+So a median probability model (MPM) would only include the variable \texttt{SOFA} as its PIP is higher (or equal) to 0.5.
 \subsection{Cause-specific variable selection}
 The PIPs refer to the importance of a variable as a predictor for all outcomes together. We may want to quantify the relevance of a variable for the prediction of each outcome individually. Therefore we proceed to cause-specific variable selection \texttt{CSVS} as described in \cite{HeyardTimsitEssaiedHeld2017}. The function \texttt{CSVS()} can be applied on one particular model either fitted using \texttt{multinom()} of the package \texttt{nnet} or using \texttt{vglm()} from \texttt{VGAM}. Note that we need a fixed $g$, so we cannot use the fully Bayes methods for CSVS:
 <<>>=
 # we first fit the model:
 model_full_nnet <- multinom(formula = full, data = VAP_data,
                             maxit = 150, trace = FALSE)
+# retrieve the g estimate of the full model
+g_est <-  tail(PMP_LEB_flat$G, 1)
 # and then apply the function
-test_CSVS_nnet <- CSVS(g = tail(PMP_LEB_flat$G, 1), model = model_full_nnet,
+test_CSVS_nnet <- CSVS(g = g_est, model = model_full_nnet,
                        discreteSurv = TRUE, package = 'nnet')
 
 @
 
-The function \texttt{plot\_CSVS} then plots the results:
+The function \texttt{plot\_CSVS} then plots the results and prints the coefficients before and after CSVS:
 <<CSVS1, fig.keep='last', fig.align='center', fig.cap = 'Absolute values of the shrunken standardized coefficients before and after CSVS.'>>=
 res <- plot_CSVS(CSVSobject = test_CSVS_nnet,
                  namesVar = NULL, shrunken = TRUE,
@@ -105,16 +110,18 @@ res <- plot_CSVS(CSVSobject = test_CSVS_nnet,
 The color scale in Figure \ref{fig:CSVS1} is defined with white to red corresponding to \Sexpr{round(min(abs(res$before)), 3)} to \Sexpr{round(max(abs(res$before)), 3)} for the upper plot and to \Sexpr{round(min(abs(res$after)), 3)} to \Sexpr{round(max(abs(res$after)), 3)} for the lower plot. Furthermore, the outcomes are defined as 1:dead, 2:extubated and 3:VAP.
 
 \subsection{Dynamic variable selection using landmarking}
-In a very last step, we can proceed to dynamic variable selection via landmarking using the function \texttt{PIPs\_by\_landmarking()}. The landmarking technique has been introduced by \cite{vanHouwelingen2007}, used in connection with PIPs by \cite{HeldGravestockBove2016} and been extended to the context of discrete time-to-event competing risks model by \cite{HeyardTimsitEssaiedHeld2017}. To do so, we need to set the same parameters as for \texttt{PMP()}. Further, we need to specify the landmark length in days (here \texttt{landmarkLength=4}), the last landmark (here \texttt{lastlandmark=20}) and the name of the variable indication the time (here \texttt{timeVariableName = `day'}).
+In a very last step, we can proceed to dynamic variable selection via landmarking using the function \texttt{PIPs\_by\_landmarking()}. The landmarking technique has been extensively discussed by \cite{vanHouwelingen2007}, used in connection with PIPs by \cite{HeldGravestockBove2016} and been extended to the context of discrete time-to-event competing risks model by \cite{HeyardTimsitEssaiedHeld2017}. To do so, we need to set the same parameters as for \texttt{PMP()}. Further, we need to specify the landmark length in days (here \texttt{landmarkLength=4}), the last landmark (here \texttt{lastlandmark=20}) and the name of the variable indication the time (here \texttt{timeVariableName = `day'}).
 <<>>=
 pips_landmark <-
-  PIPs_by_landmarking(fullModel = full, data = VAP_data, discreteSurv = TRUE,
-                      numberCores = 1, landmarkLength = 4, lastlandmark = 20,
+  PIPs_by_landmarking(fullModel = full, data = VAP_data,
+                      discreteSurv = TRUE, numberCores = 1,
+                      landmarkLength = 4, lastlandmark = 20,
                       timeVariableName = 'day')
 @
 
 <<PIPs_landmark, fig.keep='last', fig.align='center', fig.cap = 'The posterior inclusion probabilities for each landmark.'>>=
-pips_matrix <- matrix(unlist(pips_landmark), nrow = length(pips_landmark),
+pips_matrix <- matrix(unlist(pips_landmark),
+                      nrow = length(pips_landmark),
                       byrow = TRUE)
 colnames(pips_matrix) <- names(pips_landmark[[1]])
 par(mfrow = c(2,2), las = 1)
@@ -127,7 +134,7 @@ for(i in 1:ncol(pips_matrix)){
   abline(h = .5, col = 'blue', lty = 2)
 }
 @
-See \ref{fig:PIPs_landmark} for the evolution of the PIPs over time.
+See Figure \ref{fig:PIPs_landmark} for the evolution of the PIPs over time. If again, we only include the variable with PIP $\geq 0.5$ for the MPM, we would use a different set of predictors depending on the landmark considered or the time already spent at risk.
 \section{(Simple) multinomial regression}
 We can as well apply the TBF methodology on multinomial regression models by setting the parameter \texttt{discreteSurv} to \texttt{FALSE}.
 \bibliography{vignette}

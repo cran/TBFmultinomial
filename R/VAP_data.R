@@ -1,6 +1,6 @@
 #' Data on VAP acquistion in one ICU
 #'
-#' It is a tiny subset of the OUTCOMEREA database whose only perhaps will be to
+#' It is a simulated dataset with information very to the inform OUTCOMEREA database whose only purpose will be to
 #' test an illustrate the functions of this package.
 #'
 #' @format A data frame with 1640 rows and 7 variables on 90 distinct patients:
